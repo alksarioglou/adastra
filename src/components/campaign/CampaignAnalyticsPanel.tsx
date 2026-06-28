@@ -2,11 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { LopusAttribution } from "@/components/campaign/LopusAttribution";
+import {
+  CAMPAIGN_ANALYTICS,
+  LIVE_PANEL_UNIQUE,
+  SCAN_SERIES,
+  TARGET_SCANS,
+} from "@/lib/campaignAnalyticsMetrics";
 
 const GLASS =
   "border-l border-white/15 bg-[#0c1018]/95 shadow-[-20px_0_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl";
-
-const SCAN_SERIES = [0, 3, 11, 28, 52, 89, 134, 178, 224, 268, 312, 348];
 const HOURLY_BARS = [12, 28, 45, 62, 88, 100, 94, 76, 58, 41, 22, 14];
 
 const TIPS = [
@@ -161,9 +165,9 @@ export function CampaignAnalyticsPanel({
     setAnimating(false);
   }, [open]);
 
-  const scans = useAnimatedValue(348, animating, 3000);
-  const unique = useAnimatedValue(214, animating, 3200);
-  const ctr = useAnimatedValue(62, animating, 2800);
+  const scans = useAnimatedValue(TARGET_SCANS, animating, 3800);
+  const unique = useAnimatedValue(LIVE_PANEL_UNIQUE, animating, 4000);
+  const ctr = useAnimatedValue(Math.round(CAMPAIGN_ANALYTICS.scanThroughPct * 10), animating, 2800);
 
   const conversionDisplay = useMemo(() => (ctr / 10).toFixed(1), [ctr]);
 

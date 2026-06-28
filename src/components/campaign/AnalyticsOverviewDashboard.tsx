@@ -11,16 +11,41 @@ import {
   getCampaignPayment,
   getCampaignPremise,
 } from "@/lib/campaignSession";
-
-const FUNNEL = [
-  { label: "Drone impressions", value: "12,400" },
-  { label: "QR scans", value: "1,860", note: "15.0%" },
-  { label: "Landing visits", value: "1,490", note: "80.1%" },
-  { label: "Signups", value: "312", note: "20.9%" },
-  { label: "Qualified pipeline", value: "$148,000", accent: true },
-];
+import { FUNNEL_STEPS, OVERVIEW_STATS } from "@/lib/campaignAnalyticsMetrics";
 
 const LOPUS_URL = "https://lopus.ai/";
+
+function useAnimatedValue(target: number, durationMs = 3200) {
+  const [value, setValue] = useState(0);
+
+  useEffect(() => {
+    const start = performance.now();
+    let frame = 0;
+
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / durationMs);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setValue(Math.round(target * eased));
+      if (t < 1) frame = requestAnimationFrame(tick);
+    };
+
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [target, durationMs]);
+
+  return value;
+}
+
+function formatStatValue(
+  value: number,
+  format: "number" | "currency",
+  animated: number,
+) {
+  if (format === "currency") {
+    return `$${animated.toFixed(2)}`;
+  }
+  return animated.toLocaleString();
+}
 
 export function AnalyticsOverviewDashboard() {
   const router = useRouter();
@@ -28,6 +53,15 @@ export function AnalyticsOverviewDashboard() {
   const [productName, setProductName] = useState("Campaign");
   const [txId, setTxId] = useState("");
   const [amount, setAmount] = useState("");
+
+  const animatedScans = useAnimatedValue(
+    OVERVIEW_STATS[0].value as number,
+    3600,
+  );
+  const animatedViewers = useAnimatedValue(
+    OVERVIEW_STATS[1].value as number,
+    3800,
+  );
 
   useEffect(() => {
     const leads = getCampaignLeads();
@@ -38,6 +72,15 @@ export function AnalyticsOverviewDashboard() {
     if (payment?.txId) setTxId(payment.txId);
     if (payment?.amount) setAmount(payment.amount);
   }, []);
+
+  const animatedStats = [
+    { ...OVERVIEW_STATS[0], animated: animatedScans },
+    { ...OVERVIEW_STATS[1], animated: animatedViewers },
+    {
+      ...OVERVIEW_STATS[2],
+      animated: OVERVIEW_STATS[2].value as number,
+    },
+  ];
 
   return (
     <FlowShell>
@@ -63,14 +106,12 @@ export function AnalyticsOverviewDashboard() {
         )}
 
         <div className="grid gap-px border border-ink bg-ink sm:grid-cols-3">
-          {[
-            { label: "Total scans", value: "1,860", delta: "+18% vs. forecast" },
-            { label: "Unique viewers", value: "1,214", delta: "65% scan rate" },
-            { label: "Cost per signup", value: "$7.69", delta: "2.4× below paid social" },
-          ].map((stat) => (
+          {animatedStats.map((stat) => (
             <div key={stat.label} className="bg-panel p-6">
               <p className="label text-muted">{stat.label}</p>
-              <p className="display mt-2 text-2xl text-ink">{stat.value}</p>
+              <p className="display mt-2 text-xl tabular-nums text-ink sm:text-2xl">
+                {formatStatValue(stat.value, stat.format, stat.animated)}
+              </p>
               <p className="mt-1 text-xs text-orange">{stat.delta}</p>
             </div>
           ))}
@@ -82,7 +123,7 @@ export function AnalyticsOverviewDashboard() {
             <LopusAttribution variant="light" />
           </div>
           <ul>
-            {FUNNEL.map((step, i) => (
+            {FUNNEL_STEPS.map((step, i) => (
               <li
                 key={i}
                 className="flex items-center justify-between border-b border-line py-3 last:border-0 last:pb-0"
