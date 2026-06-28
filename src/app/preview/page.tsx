@@ -15,10 +15,7 @@ import {
 } from "@/components/preview/PlaceSearchBar";
 import { PreviewControls } from "@/components/preview/PreviewControls";
 import {
-  CITY_LOCATIONS,
-  cityToTakeoverLocation,
   customTakeoverLocation,
-  getCityLocation,
   type TakeoverLocation,
 } from "@/lib/preview/cityLocations";
 import { generateQRMatrix } from "@/lib/preview/qrMatrix";
@@ -39,7 +36,6 @@ const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
 export default function PreviewPage() {
   const map3dRef = useRef<GoogleMap3DPreviewHandle>(null);
   const streetViewRef = useRef<StreetViewPreviewHandle>(null);
-  const [cityId, setCityId] = useState("san-francisco");
   const [viewPreset, setViewPreset] = useState<ViewPreset>("skyline");
   const [hour, setHour] = useState(14);
   const [destinationUrl, setDestinationUrl] = useState("https://stellarqr.com");
@@ -47,17 +43,21 @@ export default function PreviewPage() {
   const [message, setMessage] = useState("Scan the Sky");
   const [qrMatrix, setQrMatrix] = useState<boolean[][]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [customPlace, setCustomPlace] = useState<SelectedPlace | null>(null);
+  const [selectedPlace, setSelectedPlace] = useState<SelectedPlace | null>(null);
 
-  const city = getCityLocation(cityId);
-  const activeLocation: TakeoverLocation = customPlace
+  const activeLocation: TakeoverLocation = selectedPlace
     ? customTakeoverLocation(
-        customPlace.name,
-        customPlace.latitude,
-        customPlace.longitude,
-        customPlace.address,
+        selectedPlace.name,
+        selectedPlace.latitude,
+        selectedPlace.longitude,
+        selectedPlace.address,
       )
-    : cityToTakeoverLocation(city);
+    : customTakeoverLocation(
+        "Choose a location",
+        37.7897,
+        -122.4009,
+        "Search any address or venue above",
+      );
   const timeMode = getTimeMode(hour);
   const droneCount = qrMatrix.flat().filter(Boolean).length;
 
@@ -71,14 +71,8 @@ export default function PreviewPage() {
     };
   }, [destinationUrl]);
 
-  const handleCityChange = (id: string) => {
-    setCustomPlace(null);
-    setCityId(id);
-    setViewPreset("skyline");
-  };
-
   const handlePlaceSelect = (place: SelectedPlace) => {
-    setCustomPlace(place);
+    setSelectedPlace(place);
     setViewPreset("skyline");
   };
 
@@ -120,7 +114,7 @@ export default function PreviewPage() {
                 qrMatrix={qrMatrix}
                 hour={hour}
                 brandColor={brandColor}
-                viewPreset={viewPreset as "street" | "qr"}
+                viewPreset="qr"
               />
             ) : (
               <GoogleMap3DPreview
@@ -150,15 +144,8 @@ export default function PreviewPage() {
         <PlaceSearchBar onPlaceSelect={handlePlaceSelect} />
 
         <PreviewControls
-          cities={CITY_LOCATIONS.map((c) => ({
-            id: c.id,
-            name: c.name,
-            short: c.short,
-          }))}
-          activeCityId={customPlace ? "" : cityId}
           activeLocationName={activeLocation.name}
           activeLocationTagline={activeLocation.tagline}
-          isCustomLocation={!!customPlace}
           viewPreset={viewPreset}
           timeLabel={
             timeMode === "night"
@@ -169,7 +156,6 @@ export default function PreviewPage() {
           }
           droneCount={droneCount}
           qrAltitude={activeLocation.qrAltitudeMeters}
-          onCityChange={handleCityChange}
           onViewPresetChange={handleViewPreset}
           onZoomIn={() =>
             (usesStreetView(viewPreset)

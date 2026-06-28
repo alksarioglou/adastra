@@ -1,5 +1,5 @@
-export type ViewPreset = "skyline" | "overhead" | "street" | "qr";
+export type ViewPreset = "skyline" | "overhead" | "qr";
 
 export function usesStreetView(preset: ViewPreset): boolean {
-  return preset === "street" || preset === "qr";
+  return preset === "qr";
 }

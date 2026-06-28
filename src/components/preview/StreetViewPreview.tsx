@@ -13,18 +13,12 @@ import { bearingBetween, distanceBetweenMeters } from "@/lib/preview/geo";
 import { findNearestPanorama } from "@/lib/preview/streetViewLookup";
 import { getStreetViewQrAltitude } from "@/lib/preview/streetViewQr";
 import type { TakeoverLocation } from "@/lib/preview/cityLocations";
-import type { ViewPreset } from "@/lib/preview/viewPreset";
 import { getTimeMode } from "@/lib/preview/timeOfDay";
 
 export type StreetViewPreviewHandle = {
   zoomIn: () => void;
   zoomOut: () => void;
   resetView: () => void;
-};
-
-const INITIAL_PITCH: Record<"street" | "qr", number> = {
-  street: 0,
-  qr: 52,
 };
 
 const StreetViewPreview = forwardRef<
@@ -34,10 +28,10 @@ const StreetViewPreview = forwardRef<
     qrMatrix: boolean[][];
     hour: number;
     brandColor: string;
-    viewPreset: "street" | "qr";
+    viewPreset: "qr";
   }
 >(function StreetViewPreview(
-  { location, qrMatrix, hour, brandColor, viewPreset },
+  { location, qrMatrix, hour, brandColor },
   ref,
 ) {
   const streetViewLib = useMapsLibrary("streetView");
@@ -82,10 +76,7 @@ const StreetViewPreview = forwardRef<
       pano.setZoom(1);
       pano.setPov({
         heading: initialPovRef.current.heading,
-        pitch:
-          viewPreset === "qr"
-            ? initialPovRef.current.scanPitch
-            : initialPovRef.current.pitch,
+        pitch: initialPovRef.current.scanPitch,
       });
     },
   }));
@@ -168,7 +159,7 @@ const StreetViewPreview = forwardRef<
         (Math.atan2(skyAlt - 2, dist) * 180) / Math.PI;
       // Look slightly below the formation so the QR sits high in the frame.
       const scanPitch = Math.min(84, Math.max(55, elevationAngle - 12));
-      const pitch = viewPreset === "qr" ? scanPitch : INITIAL_PITCH[viewPreset];
+      const pitch = scanPitch;
 
       if (data.location.pano) {
         panorama.setPano(data.location.pano);
@@ -196,23 +187,7 @@ const StreetViewPreview = forwardRef<
     location.latitude,
     location.longitude,
     location.name,
-    viewPreset,
   ]);
-
-  useEffect(() => {
-    const pano = panoramaRef.current;
-    if (!pano || status !== "ready") return;
-
-    const pitch =
-      viewPreset === "qr"
-        ? initialPovRef.current.scanPitch
-        : INITIAL_PITCH[viewPreset];
-    initialPovRef.current.pitch = pitch;
-    pano.setPov({
-      heading: initialPovRef.current.heading,
-      pitch,
-    });
-  }, [viewPreset, status]);
 
   return (
     <div className="relative h-full w-full bg-[#111]">
@@ -246,19 +221,12 @@ const StreetViewPreview = forwardRef<
             </p>
             <p className="text-xs text-white/50">
               {statusMessage ??
-                "Try a major street address or one of the preset cities."}
+                "Try searching for a major street address or landmark."}
             </p>
           </div>
         </div>
       )}
 
-      {status === "ready" && viewPreset === "street" && (
-        <div className="pointer-events-none absolute bottom-28 left-1/2 z-30 -translate-x-1/2">
-          <p className="rounded-full border border-white/20 bg-black/50 px-4 py-2 text-xs text-white/80 backdrop-blur-md">
-            Drag up slowly — QR appears around 55° · try Scan View for the ideal angle
-          </p>
-        </div>
-      )}
     </div>
   );
 });

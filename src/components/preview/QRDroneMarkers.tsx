@@ -35,7 +35,6 @@ function DroneDot({
 const DOT_SIZE: Record<ViewPreset, number> = {
   skyline: 10,
   overhead: 14,
-  street: 18,
   qr: 22,
 };
 

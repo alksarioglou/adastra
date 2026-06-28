@@ -131,13 +131,6 @@ export function getMap3DCamera(
       return getSkylineCamera(location);
     case "overhead":
       return getOverheadCamera(location);
-    case "street":
-      // Sidewalk POV — ~72 m back, 1.7 m eye height, wide FOV
-      return getPedestrianCamera(location, {
-        distance: 72,
-        eyeHeight: 1.7,
-        fov: 58,
-      });
     case "qr":
       // Closer scan angle — pedestrian holding phone up
       return getPedestrianCamera(location, {

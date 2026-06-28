@@ -41,23 +41,12 @@ function IconSettings() {
   );
 }
 
-type CityOption = {
-  id: string;
-  name: string;
-  short: string;
-};
-
 const VIEW_PRESETS: { id: ViewPreset; label: string; hint?: string }[] = [
   { id: "skyline", label: "Skyline", hint: "Campaign planning overview" },
   {
     id: "overhead",
     label: "Overhead",
     hint: "Directly above — full QR formation",
-  },
-  {
-    id: "street",
-    label: "Street View",
-    hint: "Google Street View — drag up to see the QR in the sky",
   },
   {
     id: "qr",
@@ -67,16 +56,12 @@ const VIEW_PRESETS: { id: ViewPreset; label: string; hint?: string }[] = [
 ];
 
 export function PreviewControls({
-  cities,
-  activeCityId,
   activeLocationName,
   activeLocationTagline,
-  isCustomLocation,
   viewPreset,
   timeLabel,
   droneCount,
   qrAltitude,
-  onCityChange,
   onViewPresetChange,
   onZoomIn,
   onZoomOut,
@@ -84,16 +69,12 @@ export function PreviewControls({
   onOpenSettings,
   settingsOpen,
 }: {
-  cities: CityOption[];
-  activeCityId: string;
   activeLocationName: string;
   activeLocationTagline?: string;
-  isCustomLocation?: boolean;
   viewPreset: ViewPreset;
   timeLabel: string;
   droneCount: number;
   qrAltitude: number;
-  onCityChange: (id: string) => void;
   onViewPresetChange: (preset: ViewPreset) => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
@@ -109,7 +90,7 @@ export function PreviewControls({
           <div className="mb-2 flex items-center justify-between px-2 pt-1">
             <div>
               <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-white/45">
-                {isCustomLocation ? "Custom location" : "Viewing"}
+                Location
               </p>
               <p className="text-sm font-semibold text-white">{activeLocationName}</p>
               {activeLocationTagline && (
@@ -124,28 +105,7 @@ export function PreviewControls({
             </div>
           </div>
 
-          <div className="flex gap-1.5 overflow-x-auto px-1 pb-1 scrollbar-none">
-            {cities.map((c) => {
-              const active = c.id === activeCityId;
-              return (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => onCityChange(c.id)}
-                  className={`shrink-0 rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${
-                    active
-                      ? "bg-white/25 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]"
-                      : "text-white/55 hover:bg-white/10 hover:text-white/90"
-                  }`}
-                >
-                  <span className="mr-1.5 font-semibold">{c.short}</span>
-                  <span className="hidden sm:inline opacity-80">{c.name}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          <p className="px-2 pb-1 text-center text-[10px] text-white/35">
+          <p className="px-2 pb-2 text-center text-[10px] text-white/35">
             {VIEW_PRESETS.find((p) => p.id === viewPreset)?.hint ??
               "Scroll or pinch to zoom · drag to orbit · right-drag to pan"}
           </p>
