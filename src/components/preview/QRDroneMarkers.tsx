@@ -2,19 +2,27 @@
 
 import { useMemo } from "react";
 import { AltitudeMode, Marker3D } from "@vis.gl/react-google-maps";
-import { offsetLatLng } from "@/lib/preview/geo";
-import type { CityLocation } from "@/lib/preview/cityLocations";
+import type { TakeoverLocation } from "@/lib/preview/cityLocations";
+import { getQRDronePositions } from "@/lib/preview/qrPositions";
+import type { ViewPreset } from "@/lib/preview/viewPreset";
 import { getTimeMode } from "@/lib/preview/timeOfDay";
 
-const MODULE_SPACING = 2.8;
-
-function DroneDot({ color, glow }: { color: string; glow: boolean }) {
+function DroneDot({
+  color,
+  glow,
+  size,
+}: {
+  color: string;
+  glow: boolean;
+  size: number;
+}) {
+  const r = size * 0.4;
   return (
-    <svg width="10" height="10" viewBox="0 0 10 10">
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
       <circle
-        cx="5"
-        cy="5"
-        r="4"
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
         fill={color}
         stroke={glow ? color : "#0f172a"}
         strokeWidth="0.5"
@@ -24,42 +32,35 @@ function DroneDot({ color, glow }: { color: string; glow: boolean }) {
   );
 }
 
+const DOT_SIZE: Record<ViewPreset, number> = {
+  skyline: 10,
+  overhead: 14,
+  street: 18,
+  qr: 22,
+};
+
 export function QRDroneMarkers({
-  city,
+  location,
   matrix,
   hour,
   brandColor,
+  viewPreset = "skyline",
 }: {
-  city: CityLocation;
+  location: TakeoverLocation;
   matrix: boolean[][];
   hour: number;
   brandColor: string;
+  viewPreset?: ViewPreset;
 }) {
   const isNight = getTimeMode(hour) !== "day";
-  const color = isNight ? brandColor : "#1e293b";
+  const color = isNight ? brandColor : "#0f172a";
+  const dotSize = DOT_SIZE[viewPreset];
+  const glow = isNight || viewPreset !== "skyline";
 
-  const positions = useMemo(() => {
-    if (matrix.length === 0) return [];
-    const rows = matrix.length;
-    const cols = matrix[0]?.length ?? 0;
-    const offsetX = -((cols - 1) * MODULE_SPACING) / 2;
-    const offsetY = ((rows - 1) * MODULE_SPACING) / 2;
-    const pts: { lat: number; lng: number; key: string }[] = [];
-
-    for (let row = 0; row < rows; row++) {
-      for (let col = 0; col < cols; col++) {
-        if (!matrix[row][col]) continue;
-        const { lat, lng } = offsetLatLng(
-          city.latitude,
-          city.longitude,
-          offsetX + col * MODULE_SPACING,
-          offsetY - row * MODULE_SPACING,
-        );
-        pts.push({ lat, lng, key: `${row}-${col}` });
-      }
-    }
-    return pts;
-  }, [matrix, city.latitude, city.longitude]);
+  const positions = useMemo(
+    () => getQRDronePositions(location, matrix),
+    [matrix, location],
+  );
 
   return (
     <>
@@ -69,13 +70,14 @@ export function QRDroneMarkers({
           position={{
             lat: p.lat,
             lng: p.lng,
-            altitude: city.qrAltitudeMeters,
+            altitude: location.qrAltitudeMeters,
           }}
-          altitudeMode={AltitudeMode.RELATIVE_TO_MESH}
+          altitudeMode={AltitudeMode.RELATIVE_TO_GROUND}
+          extruded={false}
           sizePreserved
           drawsWhenOccluded
         >
-          <DroneDot color={color} glow={isNight} />
+          <DroneDot color={color} glow={glow} size={dotSize} />
         </Marker3D>
       ))}
     </>

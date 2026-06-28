@@ -1,17 +1,31 @@
-export type CityLocation = {
-  id: string;
+import {
+  getOverheadCamera,
+  getPedestrianCamera,
+  getSkylineCamera,
+} from "./cameraPresets";
+import type { ViewPreset } from "./viewPreset";
+
+export type Map3DCameraPreset = {
+  centerAltitude: number;
+  range: number;
+  heading: number;
+  tilt: number;
+};
+
+export type TakeoverLocation = {
   name: string;
-  short: string;
-  tagline: string;
+  short?: string;
+  tagline?: string;
   latitude: number;
   longitude: number;
   qrAltitudeMeters: number;
-  map3d: {
-    centerAltitude: number;
-    range: number;
-    heading: number;
-    tilt: number;
-  };
+  map3d: Map3DCameraPreset;
+};
+
+export type CityLocation = TakeoverLocation & {
+  id: string;
+  short: string;
+  tagline: string;
 };
 
 export type Map3DCamera = {
@@ -19,6 +33,9 @@ export type Map3DCamera = {
   range: number;
   heading: number;
   tilt: number;
+  cameraPosition?: { lat: number; lng: number; altitude: number };
+  fov?: number;
+  altitudeMode?: "ABSOLUTE" | "RELATIVE_TO_GROUND" | "RELATIVE_TO_MESH";
 };
 
 export const CITY_LOCATIONS: CityLocation[] = [
@@ -78,28 +95,55 @@ export function getCityLocation(id: string): CityLocation {
   return CITY_LOCATIONS.find((c) => c.id === id) ?? CITY_LOCATIONS[0];
 }
 
-export function getMap3DCamera(
-  city: CityLocation,
-  preset: "skyline" | "street" | "qr" = "skyline",
-): Map3DCamera {
-  const { map3d } = city;
-  const base: Map3DCamera = {
-    center: {
-      lat: city.latitude,
-      lng: city.longitude,
-      altitude: map3d.centerAltitude,
-    },
-    range: map3d.range,
-    heading: map3d.heading,
-    tilt: map3d.tilt,
-  };
+export function cityToTakeoverLocation(city: CityLocation): TakeoverLocation {
+  return city;
+}
 
+const DEFAULT_CUSTOM_CAMERA: Map3DCameraPreset = {
+  centerAltitude: 60,
+  range: 900,
+  heading: 320,
+  tilt: 67,
+};
+
+export function customTakeoverLocation(
+  name: string,
+  latitude: number,
+  longitude: number,
+  tagline?: string,
+): TakeoverLocation {
+  return {
+    name,
+    tagline,
+    latitude,
+    longitude,
+    qrAltitudeMeters: 180,
+    map3d: DEFAULT_CUSTOM_CAMERA,
+  };
+}
+
+export function getMap3DCamera(
+  location: TakeoverLocation,
+  preset: ViewPreset = "skyline",
+): Map3DCamera {
   switch (preset) {
+    case "skyline":
+      return getSkylineCamera(location);
+    case "overhead":
+      return getOverheadCamera(location);
     case "street":
-      return { ...base, range: map3d.range * 0.45, tilt: 48 };
+      // Sidewalk POV — ~72 m back, 1.7 m eye height, wide FOV
+      return getPedestrianCamera(location, {
+        distance: 72,
+        eyeHeight: 1.7,
+        fov: 58,
+      });
     case "qr":
-      return { ...base, range: 420, tilt: 78, heading: map3d.heading + 15 };
-    default:
-      return base;
+      // Closer scan angle — pedestrian holding phone up
+      return getPedestrianCamera(location, {
+        distance: 55,
+        eyeHeight: 1.7,
+        fov: 46,
+      });
   }
 }

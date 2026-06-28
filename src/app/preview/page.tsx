@@ -5,14 +5,21 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { CampaignDrawer } from "@/components/preview/CampaignDrawer";
-import type {
-  GoogleMap3DPreviewHandle,
-  ViewPreset,
-} from "@/components/preview/GoogleMap3DPreview";
+import type { GoogleMap3DPreviewHandle } from "@/components/preview/GoogleMap3DPreview";
+import type { StreetViewPreviewHandle } from "@/components/preview/StreetViewPreview";
+import type { ViewPreset } from "@/lib/preview/viewPreset";
+import { usesStreetView } from "@/lib/preview/viewPreset";
+import {
+  PlaceSearchBar,
+  type SelectedPlace,
+} from "@/components/preview/PlaceSearchBar";
 import { PreviewControls } from "@/components/preview/PreviewControls";
 import {
   CITY_LOCATIONS,
+  cityToTakeoverLocation,
+  customTakeoverLocation,
   getCityLocation,
+  type TakeoverLocation,
 } from "@/lib/preview/cityLocations";
 import { generateQRMatrix } from "@/lib/preview/qrMatrix";
 import { formatHour, getTimeMode } from "@/lib/preview/timeOfDay";
@@ -22,10 +29,16 @@ const GoogleMap3DPreview = dynamic(
   { ssr: false },
 );
 
+const StreetViewPreview = dynamic(
+  () => import("@/components/preview/StreetViewPreview"),
+  { ssr: false },
+);
+
 const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
 
 export default function PreviewPage() {
-  const viewerRef = useRef<GoogleMap3DPreviewHandle>(null);
+  const map3dRef = useRef<GoogleMap3DPreviewHandle>(null);
+  const streetViewRef = useRef<StreetViewPreviewHandle>(null);
   const [cityId, setCityId] = useState("san-francisco");
   const [viewPreset, setViewPreset] = useState<ViewPreset>("skyline");
   const [hour, setHour] = useState(14);
@@ -34,8 +47,17 @@ export default function PreviewPage() {
   const [message, setMessage] = useState("Scan the Sky");
   const [qrMatrix, setQrMatrix] = useState<boolean[][]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [customPlace, setCustomPlace] = useState<SelectedPlace | null>(null);
 
   const city = getCityLocation(cityId);
+  const activeLocation: TakeoverLocation = customPlace
+    ? customTakeoverLocation(
+        customPlace.name,
+        customPlace.latitude,
+        customPlace.longitude,
+        customPlace.address,
+      )
+    : cityToTakeoverLocation(city);
   const timeMode = getTimeMode(hour);
   const droneCount = qrMatrix.flat().filter(Boolean).length;
 
@@ -50,13 +72,18 @@ export default function PreviewPage() {
   }, [destinationUrl]);
 
   const handleCityChange = (id: string) => {
+    setCustomPlace(null);
     setCityId(id);
+    setViewPreset("skyline");
+  };
+
+  const handlePlaceSelect = (place: SelectedPlace) => {
+    setCustomPlace(place);
     setViewPreset("skyline");
   };
 
   const handleViewPreset = (preset: ViewPreset) => {
     setViewPreset(preset);
-    viewerRef.current?.setViewPreset(preset);
   };
 
   if (!apiKey) {
@@ -82,22 +109,34 @@ export default function PreviewPage() {
   }
 
   return (
-    <APIProvider apiKey={apiKey} libraries={["maps3d"]}>
+    <APIProvider apiKey={apiKey} libraries={["maps3d", "places", "streetView"]}>
       <div className="relative h-screen w-screen overflow-hidden bg-[#0a0f14]">
         <div className="absolute inset-0">
-          {qrMatrix.length > 0 && (
-            <GoogleMap3DPreview
-              ref={viewerRef}
-              city={city}
-              qrMatrix={qrMatrix}
-              hour={hour}
-              brandColor={brandColor}
-              viewPreset={viewPreset}
-            />
-          )}
+          {qrMatrix.length > 0 &&
+            (usesStreetView(viewPreset) ? (
+              <StreetViewPreview
+                ref={streetViewRef}
+                location={activeLocation}
+                qrMatrix={qrMatrix}
+                hour={hour}
+                brandColor={brandColor}
+                viewPreset={viewPreset as "street" | "qr"}
+              />
+            ) : (
+              <GoogleMap3DPreview
+                ref={map3dRef}
+                location={activeLocation}
+                qrMatrix={qrMatrix}
+                hour={hour}
+                brandColor={brandColor}
+                viewPreset={viewPreset}
+              />
+            ))}
         </div>
 
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/45" />
+        {!usesStreetView(viewPreset) && (
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/45" />
+        )}
 
         <header className="pointer-events-none absolute left-0 right-0 top-0 z-10 px-6 py-5">
           <Link
@@ -108,14 +147,18 @@ export default function PreviewPage() {
           </Link>
         </header>
 
+        <PlaceSearchBar onPlaceSelect={handlePlaceSelect} />
+
         <PreviewControls
           cities={CITY_LOCATIONS.map((c) => ({
             id: c.id,
             name: c.name,
             short: c.short,
           }))}
-          activeCityId={cityId}
-          activeCityName={city.name}
+          activeCityId={customPlace ? "" : cityId}
+          activeLocationName={activeLocation.name}
+          activeLocationTagline={activeLocation.tagline}
+          isCustomLocation={!!customPlace}
           viewPreset={viewPreset}
           timeLabel={
             timeMode === "night"
@@ -125,12 +168,27 @@ export default function PreviewPage() {
                 : formatHour(hour)
           }
           droneCount={droneCount}
-          qrAltitude={city.qrAltitudeMeters}
+          qrAltitude={activeLocation.qrAltitudeMeters}
           onCityChange={handleCityChange}
           onViewPresetChange={handleViewPreset}
-          onZoomIn={() => viewerRef.current?.zoomIn()}
-          onZoomOut={() => viewerRef.current?.zoomOut()}
-          onResetView={() => viewerRef.current?.resetView()}
+          onZoomIn={() =>
+            (usesStreetView(viewPreset)
+              ? streetViewRef
+              : map3dRef
+            ).current?.zoomIn()
+          }
+          onZoomOut={() =>
+            (usesStreetView(viewPreset)
+              ? streetViewRef
+              : map3dRef
+            ).current?.zoomOut()
+          }
+          onResetView={() =>
+            (usesStreetView(viewPreset)
+              ? streetViewRef
+              : map3dRef
+            ).current?.resetView()
+          }
           onOpenSettings={() => setSettingsOpen((o) => !o)}
           settingsOpen={settingsOpen}
         />

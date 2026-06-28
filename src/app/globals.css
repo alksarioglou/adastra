@@ -47,3 +47,17 @@ body {
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
+
+/* Place autocomplete — glass morphism host */
+.stellar-place-autocomplete-host {
+  width: 100%;
+}
+
+.stellar-place-autocomplete {
+  width: 100%;
+  color-scheme: dark;
+  --gmp-mat-color-surface: rgba(255, 255, 255, 0.08);
+  --gmp-mat-color-on-surface: rgba(255, 255, 255, 0.95);
+  --gmp-mat-color-on-surface-variant: rgba(255, 255, 255, 0.55);
+  --gmp-mat-color-primary: #22d3ee;
+}

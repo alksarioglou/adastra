@@ -1,6 +1,6 @@
 "use client";
 
-import type { ViewPreset } from "./GoogleMap3DPreview";
+import type { ViewPreset } from "@/lib/preview/viewPreset";
 
 const GLASS =
   "border border-white/20 bg-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.25)] backdrop-blur-2xl";
@@ -47,16 +47,31 @@ type CityOption = {
   short: string;
 };
 
-const VIEW_PRESETS: { id: ViewPreset; label: string }[] = [
-  { id: "skyline", label: "Skyline" },
-  { id: "street", label: "Street" },
-  { id: "qr", label: "QR View" },
+const VIEW_PRESETS: { id: ViewPreset; label: string; hint?: string }[] = [
+  { id: "skyline", label: "Skyline", hint: "Campaign planning overview" },
+  {
+    id: "overhead",
+    label: "Overhead",
+    hint: "Directly above — full QR formation",
+  },
+  {
+    id: "street",
+    label: "Street View",
+    hint: "Google Street View — drag up to see the QR in the sky",
+  },
+  {
+    id: "qr",
+    label: "Scan View",
+    hint: "Street View angled up — phone-in-hand scannability",
+  },
 ];
 
 export function PreviewControls({
   cities,
   activeCityId,
-  activeCityName,
+  activeLocationName,
+  activeLocationTagline,
+  isCustomLocation,
   viewPreset,
   timeLabel,
   droneCount,
@@ -71,7 +86,9 @@ export function PreviewControls({
 }: {
   cities: CityOption[];
   activeCityId: string;
-  activeCityName: string;
+  activeLocationName: string;
+  activeLocationTagline?: string;
+  isCustomLocation?: boolean;
   viewPreset: ViewPreset;
   timeLabel: string;
   droneCount: number;
@@ -92,9 +109,12 @@ export function PreviewControls({
           <div className="mb-2 flex items-center justify-between px-2 pt-1">
             <div>
               <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-white/45">
-                Viewing
+                {isCustomLocation ? "Custom location" : "Viewing"}
               </p>
-              <p className="text-sm font-semibold text-white">{activeCityName}</p>
+              <p className="text-sm font-semibold text-white">{activeLocationName}</p>
+              {activeLocationTagline && (
+                <p className="text-[10px] text-white/40">{activeLocationTagline}</p>
+              )}
             </div>
             <div className="text-right">
               <p className="text-[10px] text-white/40">{timeLabel}</p>
@@ -126,7 +146,8 @@ export function PreviewControls({
           </div>
 
           <p className="px-2 pb-1 text-center text-[10px] text-white/35">
-            Scroll or pinch to zoom · drag to orbit · right-drag to pan
+            {VIEW_PRESETS.find((p) => p.id === viewPreset)?.hint ??
+              "Scroll or pinch to zoom · drag to orbit · right-drag to pan"}
           </p>
 
           <div className="mt-1 flex gap-1 border-t border-white/10 px-1 pt-2">
