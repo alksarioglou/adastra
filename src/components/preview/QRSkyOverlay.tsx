@@ -1,34 +1,39 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { projectQRSquareScreen } from "@/lib/preview/streetViewProjection";
+import { projectQRImageLayout } from "@/lib/preview/streetViewProjection";
+import { renderStreetViewQRCanvas } from "@/lib/preview/streetViewQrCanvas";
 import { getStreetViewQrAltitude } from "@/lib/preview/streetViewQr";
 import type { TakeoverLocation } from "@/lib/preview/cityLocations";
 
-type ProjectedDot = {
-  key: string;
-  x: number;
-  y: number;
+type QRImageLayout = {
   visible: boolean;
+  centerX: number;
+  centerY: number;
+  sizePx: number;
 };
 
 export function QRSkyOverlay({
   panorama,
   location,
-  qrMatrix,
+  scanUrl,
   color,
   glow,
 }: {
   panorama: google.maps.StreetViewPanorama | null;
   location: TakeoverLocation;
-  qrMatrix: boolean[][];
+  scanUrl: string;
   color: string;
   glow: boolean;
 }) {
   const layerRef = useRef<HTMLDivElement>(null);
-  const [dots, setDots] = useState<ProjectedDot[]>([]);
-  const [dotSize, setDotSize] = useState(14);
+  const [qrImage, setQrImage] = useState<string | null>(null);
+  const [layout, setLayout] = useState<QRImageLayout | null>(null);
   const skyAltitude = getStreetViewQrAltitude(location.qrAltitudeMeters);
+
+  useEffect(() => {
+    setQrImage(renderStreetViewQRCanvas(scanUrl, { glow, glowColor: color }));
+  }, [scanUrl, glow, color]);
 
   useEffect(() => {
     if (!panorama || !layerRef.current) return;
@@ -42,24 +47,22 @@ export function QRSkyOverlay({
       const height = layer.offsetHeight;
       if (width === 0 || height === 0) return;
 
-      const projected = projectQRSquareScreen(
-        {
-          panoLat: pos.lat(),
-          panoLng: pos.lng(),
-          panoElevation: 2,
-          pov: panorama.getPov(),
-          zoom: panorama.getZoom() ?? 1,
-          width,
-          height,
-        },
-        location.latitude,
-        location.longitude,
-        skyAltitude,
-        qrMatrix,
+      setLayout(
+        projectQRImageLayout(
+          {
+            panoLat: pos.lat(),
+            panoLng: pos.lng(),
+            panoElevation: 2,
+            pov: panorama.getPov(),
+            zoom: panorama.getZoom() ?? 1,
+            width,
+            height,
+          },
+          location.latitude,
+          location.longitude,
+          skyAltitude,
+        ),
       );
-
-      setDots(projected.dots);
-      setDotSize(projected.dotSize);
     };
 
     update();
@@ -75,33 +78,33 @@ export function QRSkyOverlay({
       listeners.forEach((l) => l.remove());
       observer.disconnect();
     };
-  }, [panorama, location, qrMatrix, skyAltitude]);
+  }, [panorama, location, skyAltitude]);
 
-  const shadow = glow
-    ? `0 0 10px ${color}, 0 0 18px ${color}, 0 0 4px #fff`
-    : "0 0 6px rgba(255,255,255,0.9), 0 2px 4px rgba(0,0,0,0.4)";
+  const show = layout?.visible && qrImage && layout.sizePx > 0;
 
   return (
     <div
       ref={layerRef}
       className="pointer-events-none absolute inset-0 z-20 overflow-hidden"
     >
-      {dots.map((dot) =>
-        dot.visible ? (
-          <div
-            key={dot.key}
-            className="absolute rounded-full"
-            style={{
-              left: dot.x - dotSize / 2,
-              top: dot.y - dotSize / 2,
-              width: dotSize,
-              height: dotSize,
-              background: color,
-              boxShadow: shadow,
-              border: glow ? "1px solid rgba(255,255,255,0.6)" : "1.5px solid #fff",
-            }}
-          />
-        ) : null,
+      {show && (
+        <img
+          src={qrImage}
+          alt=""
+          className="absolute block"
+          width={layout.sizePx}
+          height={layout.sizePx}
+          style={{
+            left: layout.centerX - layout.sizePx / 2,
+            top: layout.centerY - layout.sizePx / 2,
+            width: layout.sizePx,
+            height: layout.sizePx,
+            imageRendering: "pixelated",
+            filter: glow
+              ? `drop-shadow(0 0 12px ${color}88) drop-shadow(0 4px 16px rgba(0,0,0,0.25))`
+              : "drop-shadow(0 4px 14px rgba(0,0,0,0.35))",
+          }}
+        />
       )}
     </div>
   );

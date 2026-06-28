@@ -1,7 +1,8 @@
 import QRCode from "qrcode";
 
-function buildQRMatrix(url: string, size = 29): boolean[][] {
-  const qr = QRCode.create(url, { errorCorrectionLevel: "M" });
+function buildQRMatrix(url: string, size?: number): boolean[][] {
+  const trimmed = url.trim() || "https://adastra.com";
+  const qr = QRCode.create(trimmed, { errorCorrectionLevel: "H" });
   const modules = qr.modules;
   const moduleCount = modules.size;
 
@@ -14,7 +15,7 @@ function buildQRMatrix(url: string, size = 29): boolean[][] {
     matrix.push(rowData);
   }
 
-  if (moduleCount > size) {
+  if (size !== undefined && moduleCount > size) {
     const offset = Math.floor((moduleCount - size) / 2);
     return matrix
       .slice(offset, offset + size)
@@ -24,13 +25,22 @@ function buildQRMatrix(url: string, size = 29): boolean[][] {
   return matrix;
 }
 
+/** Full QR module grid — never crop or scanners cannot decode it. */
+export async function generateQRMatrix(url: string): Promise<boolean[][]> {
+  return buildQRMatrix(url);
+}
+
+/** Cropped matrix for decorative 3D formations (not used for scanning). */
 export function generateQRMatrixSync(url: string, size = 29): boolean[][] {
   return buildQRMatrix(url, size);
 }
 
-export async function generateQRMatrix(
-  url: string,
-  size = 29,
-): Promise<boolean[][]> {
-  return buildQRMatrix(url, size);
+export async function generateQRDataUrl(url: string): Promise<string> {
+  const trimmed = url.trim() || "https://adastra.com";
+  return QRCode.toDataURL(trimmed, {
+    errorCorrectionLevel: "H",
+    margin: 2,
+    width: 512,
+    color: { dark: "#000000", light: "#FFFFFF" },
+  });
 }

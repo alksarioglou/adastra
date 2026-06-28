@@ -1,7 +1,7 @@
 import { bearingBetween, distanceBetweenMeters } from "./geo";
-import { QR_MODULE_SPACING } from "./qrPositions";
 import {
   STREET_VIEW_DOT_FILL,
+  STREET_VIEW_QR_QUIET_ZONE_FRACTION,
   STREET_VIEW_QR_SCREEN_FRACTION,
 } from "./streetViewQr";
 
@@ -84,6 +84,11 @@ export type StreetViewProjectionContext = {
  * drone plane collapses to a line when pitch is steep; this stays square.
  */
 export type ProjectedQRScreen = {
+  visible: boolean;
+  centerX: number;
+  centerY: number;
+  frameSize: number;
+  dataSize: number;
   dots: { key: string; x: number; y: number; visible: boolean }[];
   cellSize: number;
   dotSize: number;
@@ -107,7 +112,16 @@ export function projectQRSquareScreen(
     { lat: centerLat, lng: centerLng, altitude },
   );
 
-  const empty: ProjectedQRScreen = { dots: [], cellSize: 0, dotSize: 0 };
+  const empty: ProjectedQRScreen = {
+    visible: false,
+    centerX: 0,
+    centerY: 0,
+    frameSize: 0,
+    dataSize: 0,
+    dots: [],
+    cellSize: 0,
+    dotSize: 0,
+  };
 
   if (!center.visible) {
     return empty;
@@ -117,11 +131,13 @@ export function projectQRSquareScreen(
   const cols = matrix[0]?.length ?? 0;
   if (rows === 0 || cols === 0) return empty;
 
-  const qrSizePx = Math.min(
+  const frameSizePx = Math.min(
     ctx.width * STREET_VIEW_QR_SCREEN_FRACTION,
     ctx.height * 0.5,
   );
-  const cellSize = qrSizePx / Math.max(cols, rows);
+  const quietPad = frameSizePx * STREET_VIEW_QR_QUIET_ZONE_FRACTION;
+  const dataSizePx = frameSizePx - quietPad * 2;
+  const cellSize = dataSizePx / Math.max(cols, rows);
   const dotSize = cellSize * STREET_VIEW_DOT_FILL;
   const gridW = (cols - 1) * cellSize;
   const gridH = (rows - 1) * cellSize;
@@ -160,5 +176,52 @@ export function projectQRSquareScreen(
     }
   }
 
-  return { dots, cellSize, dotSize };
+  return {
+    visible: true,
+    centerX: center.x,
+    centerY: center.y,
+    frameSize: frameSizePx,
+    dataSize: dataSizePx,
+    dots,
+    cellSize,
+    dotSize,
+  };
+}
+
+export type ProjectedQRImageLayout = {
+  visible: boolean;
+  centerX: number;
+  centerY: number;
+  sizePx: number;
+};
+
+/** Screen position and size for the scannable QR panel anchored to the sky point. */
+export function projectQRImageLayout(
+  ctx: StreetViewProjectionContext,
+  centerLat: number,
+  centerLng: number,
+  altitude: number,
+): ProjectedQRImageLayout {
+  const center = projectToStreetView(
+    ctx.panoLat,
+    ctx.panoLng,
+    ctx.panoElevation,
+    ctx.pov,
+    ctx.zoom,
+    ctx.width,
+    ctx.height,
+    { lat: centerLat, lng: centerLng, altitude },
+  );
+
+  const sizePx = Math.min(
+    ctx.width * STREET_VIEW_QR_SCREEN_FRACTION,
+    ctx.height * 0.5,
+  );
+
+  return {
+    visible: center.visible,
+    centerX: center.x,
+    centerY: center.y,
+    sizePx,
+  };
 }

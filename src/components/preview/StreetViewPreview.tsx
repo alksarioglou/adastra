@@ -25,17 +25,20 @@ const StreetViewPreview = forwardRef<
   StreetViewPreviewHandle,
   {
     location: TakeoverLocation;
-    qrMatrix: boolean[][];
+    scanUrl: string;
     hour: number;
     brandColor: string;
     viewPreset: "qr";
     fixedDroneColor?: string;
   }
 >(function StreetViewPreview(
-  { location, qrMatrix, hour, brandColor, fixedDroneColor },
+  { location, scanUrl, hour, brandColor, fixedDroneColor },
   ref,
 ) {
   const streetViewLib = useMapsLibrary("streetView");
+  const isNight = getTimeMode(hour) !== "day";
+  const dotColor = fixedDroneColor ?? (isNight ? brandColor : "#22d3ee");
+  const glow = !fixedDroneColor;
   const containerRef = useRef<HTMLDivElement>(null);
   const panoramaRef = useRef<google.maps.StreetViewPanorama | null>(null);
   const initialPovRef = useRef<{
@@ -55,10 +58,6 @@ const StreetViewPreview = forwardRef<
   >("initializing");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [panoramaReady, setPanoramaReady] = useState(false);
-
-  const isNight = getTimeMode(hour) !== "day";
-  const dotColor = fixedDroneColor ?? (isNight ? brandColor : "#22d3ee");
-  const glow = !fixedDroneColor;
 
   useImperativeHandle(ref, () => ({
     zoomIn: () => {
@@ -198,7 +197,7 @@ const StreetViewPreview = forwardRef<
         <QRSkyOverlay
           panorama={panorama}
           location={location}
-          qrMatrix={qrMatrix}
+          scanUrl={scanUrl}
           color={dotColor}
           glow={glow}
         />

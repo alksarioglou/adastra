@@ -84,6 +84,7 @@ function PreviewScene({
   activeLocation,
   viewPreset,
   qrMatrix,
+  scanUrl,
   hour,
   brandColor,
   fixedDroneColor,
@@ -106,6 +107,7 @@ function PreviewScene({
   activeLocation: TakeoverLocation;
   viewPreset: ViewPreset;
   qrMatrix: boolean[][];
+  scanUrl: string;
   hour: number;
   brandColor: string;
   map3dRef: React.RefObject<GoogleMap3DPreviewHandle | null>;
@@ -136,7 +138,7 @@ function PreviewScene({
             <StreetViewPreview
               ref={streetViewRef}
               location={activeLocation}
-              qrMatrix={qrMatrix}
+              scanUrl={scanUrl}
               hour={hour}
               brandColor={brandColor}
               viewPreset="qr"
@@ -307,6 +309,7 @@ function FlowPreviewScene({
         activeLocation={activeLocation}
         viewPreset={viewPreset}
         qrMatrix={qrMatrix}
+        scanUrl={destinationUrl}
         hour={hour}
         brandColor={brandColor}
         fixedDroneColor={FLOW_DRONE_COLOR}
@@ -405,6 +408,7 @@ function StandalonePreviewScene() {
         activeLocation={activeLocation}
         viewPreset={viewPreset}
         qrMatrix={qrMatrix}
+        scanUrl={destinationUrl}
         hour={hour}
         brandColor={brandColor}
         map3dRef={map3dRef}
