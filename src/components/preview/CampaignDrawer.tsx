@@ -109,7 +109,7 @@ export function CampaignDrawer({
               onChange={(e) => onMessageChange(e.target.value)}
               maxLength={24}
               className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400/40 focus:bg-white/10"
-              placeholder="Scan the Sky"
+              placeholder="Ad Astra"
             />
           </label>
 

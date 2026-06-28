@@ -38,9 +38,9 @@ export default function PreviewPage() {
   const streetViewRef = useRef<StreetViewPreviewHandle>(null);
   const [viewPreset, setViewPreset] = useState<ViewPreset>("skyline");
   const [hour, setHour] = useState(14);
-  const [destinationUrl, setDestinationUrl] = useState("https://stellarqr.com");
+  const [destinationUrl, setDestinationUrl] = useState("https://adastra.com");
   const [brandColor, setBrandColor] = useState("#22d3ee");
-  const [message, setMessage] = useState("Scan the Sky");
+  const [message, setMessage] = useState("Ad Astra");
   const [qrMatrix, setQrMatrix] = useState<boolean[][]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<SelectedPlace | null>(null);
@@ -137,7 +137,7 @@ export default function PreviewPage() {
             href="/"
             className="pointer-events-auto inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-white/90 shadow-lg backdrop-blur-2xl transition hover:bg-white/15"
           >
-            <span className="text-sm font-semibold tracking-tight">StellarQR</span>
+            <span className="text-sm font-semibold tracking-tight">Ad Astra</span>
           </Link>
         </header>
 

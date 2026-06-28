@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "StellarQR — Bookable Sky QR Campaigns",
+  title: "Ad Astra — Bookable Sky QR Campaigns",
   description:
-    "Preview and book Drone Takeover advertising campaigns. Put your brand in the sky, measure every scan.",
+    "Preview and book drone takeover campaigns. Send your brand to the sky, measure every scan.",
 };
 
 export default function RootLayout({
