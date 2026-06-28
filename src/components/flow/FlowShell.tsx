@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { AdAstraLogo } from "@/components/AdAstraLogo";
+import { AuthControls } from "@/components/AuthControls";
 import { clearCampaignSession } from "@/lib/campaignSession";
 
 export function FlowShell({
@@ -23,13 +24,13 @@ export function FlowShell({
   return (
     <div
       className={`relative z-10 flex min-h-screen w-full flex-col ${
-        immersive ? "" : "py-8"
+        immersive ? "" : "pb-8"
       } ${className}`}
     >
       {!immersive && (
-        <header className="pointer-events-auto mb-10 w-full border-b border-line/80 bg-paper/40 backdrop-blur-[1px]">
+        <header className="pointer-events-auto mb-10 w-full border-b border-line/80 bg-paper/95 backdrop-blur-sm">
           <div
-            className={`flex w-full items-center justify-between gap-6 pb-5 ${
+            className={`flex w-full items-center justify-between gap-6 py-4 ${
               align === "left"
                 ? "px-5 sm:px-8 lg:px-12"
                 : "mx-auto max-w-3xl px-5"
@@ -42,9 +43,12 @@ export function FlowShell({
             >
               <AdAstraLogo showWordmark />
             </Link>
-            <span className="label ml-auto shrink-0 text-right text-ink/65">
-              Take your brand to the sky
-            </span>
+            <div className="ml-auto flex shrink-0 items-center gap-4">
+              <span className="label hidden text-right text-ink/65 sm:inline">
+                Take your brand to the sky
+              </span>
+              <AuthControls />
+            </div>
           </div>
         </header>
       )}

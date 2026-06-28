@@ -427,7 +427,7 @@ function StandalonePreviewScene() {
             className="pointer-events-auto inline-flex items-center rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 shadow-lg backdrop-blur-2xl transition hover:bg-white/15"
           >
             <AdAstraLogo
-              markClassName="h-9 w-9"
+              variant="dark"
               showWordmark
               wordmarkClassName="text-sm font-semibold tracking-tight text-white/90"
             />

@@ -1,3 +1,4 @@
+import {ClerkProvider} from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Jost, Michroma, Geist_Mono } from "next/font/google";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
@@ -26,8 +27,8 @@ export const metadata: Metadata = {
   description:
     "From one product URL: build your ICP, find where your leads cluster, and fly a drone swarm that paints a QR code in the sky just for them.",
   icons: {
-    icon: "/ad astra logo.png",
-    apple: "/ad astra logo.png",
+    icon: "/ad-astra-logo.png",
+    apple: "/ad-astra-logo.png",
   },
 };
 
@@ -42,7 +43,9 @@ export default function RootLayout({
       className={`${jost.variable} ${michroma.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ConvexClientProvider>{children}</ConvexClientProvider>
+        <ClerkProvider>
+          <ConvexClientProvider>{children}</ConvexClientProvider>
+        </ClerkProvider>
       </body>
     </html>
   );

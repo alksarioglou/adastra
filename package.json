@@ -12,12 +12,13 @@
     "postinstall": "node scripts/setup-cesium.mjs"
   },
   "dependencies": {
+    "@clerk/nextjs": "^7.5.9",
+    "@fiberai/sdk": "^0.0.34",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
     "@react-three/postprocessing": "^3.0.4",
     "@vis.gl/react-google-maps": "^1.8.3",
     "cesium": "^1.142.0",
-    "@fiberai/sdk": "^0.0.34",
     "convex": "^1.42.0",
     "next": "16.2.9",
     "openai": "^6.45.0",
