@@ -86,3 +86,106 @@ body {
 .corridor-animate .corridor-ring {
   animation: corridor-drift 5s linear infinite;
 }
+
+/* Cesium viewer — hide default chrome, keep credits */
+.cesium-viewer .cesium-widget-credits {
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+.cesium-viewer-bottom {
+  display: none;
+}
+
+.cesium-viewer-toolbar {
+  display: none;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Place autocomplete — glass morphism host */
+.stellar-place-autocomplete-host {
+  width: 100%;
+}
+
+.stellar-place-autocomplete {
+  width: 100%;
+  color-scheme: dark;
+  --gmp-mat-color-surface: rgba(255, 255, 255, 0.08);
+  --gmp-mat-color-on-surface: rgba(255, 255, 255, 0.95);
+  --gmp-mat-color-on-surface-variant: rgba(255, 255, 255, 0.55);
+  --gmp-mat-color-primary: #22d3ee;
+}
+
+/* ── Landing page ── */
+.landing-grain::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@keyframes landing-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes landing-flow-dash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+@keyframes landing-flow-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.landing-float {
+  animation: landing-float 7s ease-in-out infinite;
+}
+
+.landing-float-slow {
+  animation: landing-float 9s ease-in-out infinite;
+  animation-delay: -2s;
+}
+
+.landing-float-reverse {
+  animation: landing-float 8s ease-in-out infinite reverse;
+}
+
+.landing-flow-path {
+  stroke-dasharray: 6 8;
+  animation: landing-flow-dash 2.5s linear infinite;
+}
+
+.landing-flow-path-delay {
+  animation-delay: -1.2s;
+}
+
+.landing-flow-dot {
+  animation: landing-flow-pulse 2.4s ease-in-out infinite;
+}
+
+.landing-flow-dot-delay {
+  animation-delay: -1s;
+}
