@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "YC Hackathon",
-  description: "Next.js app with Convex backend",
+  title: "StellarQR — Bookable Sky QR Campaigns",
+  description:
+    "Preview and book Drone Takeover advertising campaigns. Put your brand in the sky, measure every scan.",
 };
 
 export default function RootLayout({
