@@ -28,20 +28,6 @@ export function CorridorBackdrop({
       aria-hidden
       className={`${animate ? "corridor-animate" : ""} ${className}`}
     >
-      {/* radial spokes toward the vanishing point */}
-      {!animate &&
-        OCTAGON.map(([x, y], i) => (
-          <line
-            key={`spoke-${i}`}
-            x1="0"
-            y1="0"
-            x2={x}
-            y2={y}
-            stroke="var(--ink)"
-            strokeWidth="0.15"
-          />
-        ))}
-
       {RING_SCALES.map((s, i) => (
         <g
           key={`ring-${i}`}
