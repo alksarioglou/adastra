@@ -46,6 +46,8 @@ const PREVIEW_LINES = [
 const BTN =
   "inline-flex items-center justify-center gap-2 rounded-sm bg-orange px-7 py-3.5 text-[13px] font-medium uppercase tracking-[0.16em] text-paper-pure transition hover:bg-orange-bright disabled:cursor-not-allowed disabled:bg-line disabled:text-muted";
 
+const LOPUS_URL = "https://lopus.ai/";
+
 export default function Home() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [url, setUrl] = useState("");
@@ -211,7 +213,7 @@ export default function Home() {
       )}
 
       {/* STEP 6 — Preview + pay */}
-      {phase === "preview" && preview && (
+      {phase === "preview" && preview && !payment?.success && (
         <PreviewCard preview={preview} onPay={() => setShowPay(true)} />
       )}
 
@@ -223,13 +225,95 @@ export default function Home() {
         />
       )}
 
+      {/* STEP 7 — Measure results (Lopus) */}
       {payment?.success && (
-        <div className="mt-6 rounded-sm border border-ink bg-ink px-4 py-3 text-sm text-paper">
-          <span className="text-orange">●</span> Payment confirmed ·{" "}
-          {payment.txId} · {payment.amount}. Your drones are cleared for launch.
-        </div>
+        <ResultsCard payment={payment} leads={leads} onReset={reset} />
       )}
     </div>
+  );
+}
+
+/* ---------- Results (Lopus attribution) ---------- */
+
+function ResultsCard({
+  payment,
+  leads,
+  onReset,
+}: {
+  payment: PaymentResult;
+  leads: LeadsResult | null;
+  onReset: () => void;
+}) {
+  const city = leads?.geo.city ?? "the cluster";
+  const funnel = [
+    { label: "Drone impressions", value: "12,400" },
+    { label: "QR scans", value: "1,860", note: "15.0%" },
+    { label: "Landing visits", value: "1,490", note: "80.1%" },
+    { label: "Signups", value: "312", note: "20.9%" },
+    { label: "Qualified pipeline", value: "$148,000", accent: true },
+  ];
+
+  return (
+    <section className="animate-fade-in-up">
+      <p className="label mb-3 text-orange">Mission · 005 · Measure results</p>
+      <h2 className="display text-3xl">What it was worth</h2>
+      <p className="mt-2 text-muted">
+        Ad Astra flew the campaign over {city}. Lopus connects your CRM, product,
+        and billing data to tell you what it actually converted.
+      </p>
+
+      <div className="mt-6 rounded-sm border border-ink bg-ink px-4 py-3 text-sm text-paper">
+        <span className="text-orange">●</span> Payment confirmed · {payment.txId}{" "}
+        · {payment.amount}. Drones cleared for launch.
+      </div>
+
+      <div className="mt-6 border border-line bg-panel p-7">
+        <div className="mb-5 flex items-center justify-between">
+          <p className="label text-muted">Conversion attribution</p>
+          <p className="label text-muted">
+            Powered by <span className="text-ink">Lopus</span>
+          </p>
+        </div>
+        <ul>
+          {funnel.map((f, i) => (
+            <li
+              key={i}
+              className="flex items-center justify-between border-b border-line py-3 last:border-0 last:pb-0"
+            >
+              <span className={f.accent ? "display text-lg text-orange" : "text-ink/80"}>
+                {f.label}
+              </span>
+              <span className="flex items-baseline gap-3">
+                {f.note && <span className="label text-muted">{f.note}</span>}
+                <span
+                  className={
+                    f.accent ? "display text-xl text-orange" : "font-mono text-sm"
+                  }
+                >
+                  {f.value}
+                </span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <a
+        href={LOPUS_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`${BTN} mt-8 w-full`}
+      >
+        Open dashboard in Lopus →
+      </a>
+
+      <button
+        onClick={onReset}
+        className="mt-3 w-full rounded-sm border border-line px-7 py-3 text-[13px] uppercase tracking-[0.16em] text-muted transition hover:border-ink hover:text-ink"
+      >
+        New campaign
+      </button>
+    </section>
   );
 }
 
