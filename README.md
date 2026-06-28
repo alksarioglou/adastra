@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# YC Hackathon
+
+Next.js app with [Convex](https://convex.dev) as the real-time backend.
+
+## Stack
+
+- **Next.js 16** (App Router, TypeScript, Tailwind CSS)
+- **Convex** (database, queries, real-time sync)
 
 ## Getting Started
 
-First, run the development server:
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the dev servers (Next.js + Convex run in parallel):
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+On first setup, Convex creates a `.env.local` with your deployment URL. To seed sample tasks:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npx convex import --table tasks sampleData.jsonl
+```
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+convex/           # Convex backend (schema, queries, mutations)
+src/app/          # Next.js App Router pages
+src/components/   # React components (ConvexClientProvider)
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Convex
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Backend functions live in `convex/`
+- Run `npx convex dev` to sync functions and generate types
+- Run `npx convex dashboard` to open the Convex dashboard
 
-## Deploy on Vercel
+For production, link a Convex cloud project with `npx convex login` and deploy with `npx convex deploy`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deploy
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Deploy the Next.js frontend to [Vercel](https://vercel.com). Set `NEXT_PUBLIC_CONVEX_URL` in your Vercel environment variables to your Convex deployment URL.
