@@ -2,7 +2,7 @@
 
 **With Ad Astra you can advertise your product in the sky — a drone swarm draws a scannable QR code right above your buyers.**
 
-> Hackathon track: **Sales Cyborgs — AI-Enhanced Sales**
+> Hackathon track: **AI Ad Factories: AI Advertising**
 
 Paste a product URL. Our AI reads your product, builds your Ideal Customer Profile, finds the real people who match it, and pinpoints the one place and moment where they physically cluster. Then a fleet of drones assembles into a scannable QR code in the sky above them — precision geo-targeting for the real world.
 
