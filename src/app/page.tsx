@@ -24,35 +24,84 @@ export default function Home() {
           <CorridorBackdrop className="h-full w-full" />
         </div>
 
-        <p className="label mb-6 text-orange">Mission · 001</p>
-        <h1
-          className="display text-balance text-4xl leading-[1.05] sm:text-6xl"
-          style={{ fontWeight: 480 }}
-        >
-          A new frontier in
-          <br />
-          <span className="text-orange">Geo targeting</span>
-        </h1>
-        <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
-          Drop in your product URL. We build your ICP, find where your leads
-          cluster, pick the perfect moment, and fly a drone swarm that paints a
-          QR code in the sky — just for them.
-        </p>
+          <h1
+            className="display text-balance text-4xl leading-[1.05] sm:text-6xl"
+            style={{ fontWeight: 480 }}
+          >
+            You&apos;re paying for ads
+            <br />
+            <span className="text-orange">no one looks at.</span>
+          </h1>
+          <p className="mt-6 max-w-xl text-xl leading-snug text-ink">
+            Ad Astra makes them look up — a drone-drawn QR code in the sky.
+          </p>
 
-        <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-          <input
-            type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && urlValid && startAnalyze()}
-            placeholder="https://yourproduct.com"
-            className="flex-1 rounded-sm border border-line bg-panel px-4 py-3.5 text-ink outline-none transition placeholder:text-muted/60 focus:border-orange"
-          />
-          <button onClick={startAnalyze} disabled={!urlValid} className={BTN}>
-            Analyze product
-          </button>
-        </div>
-      </section>
-    </FlowShell>
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+            <input
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && urlValid && runAnalyze()}
+              placeholder="https://yourproduct.com"
+              className="flex-1 rounded-sm border border-line bg-panel px-4 py-3.5 text-ink outline-none transition placeholder:text-muted/60 focus:border-orange"
+            />
+            <button onClick={runAnalyze} disabled={!urlValid} className={BTN}>
+              Analyze product
+            </button>
+          </div>
+
+          <p className="mt-6 max-w-xl text-sm leading-relaxed text-muted">
+            Paste a product URL. We build your ICP, find your real buyers, and
+            pinpoint exactly where and when they cluster — then a drone swarm
+            draws a scannable QR code in the sky right above them.
+          </p>
+        </section>
+      )}
+
+      {/* STEP 1 — Analyzing */}
+      {phase === "analyzing" && (
+        <ProgressConsole title="Analyzing product" lines={ANALYZE_LINES} done={false} />
+      )}
+
+      {/* STEP 2 — Premise (editable) */}
+      {phase === "premise" && premise && (
+        <PremiseCard premise={premise} onChange={setPremise} onConfirm={runLeads} />
+      )}
+
+      {/* STEP 3 — Finding leads */}
+      {phase === "finding" && (
+        <ProgressConsole title="Finding leads" lines={LEADS_LINES} done={false} />
+      )}
+
+      {/* STEP 4 — Campaign plan */}
+      {phase === "plan" && leads && <PlanCard leads={leads} onPreview={runPreview} />}
+
+      {/* STEP 5 — Generating preview */}
+      {phase === "generating" && (
+        <ProgressConsole
+          title="Generating campaign preview"
+          lines={PREVIEW_LINES}
+          done={false}
+        />
+      )}
+
+      {/* STEP 6 — Preview + pay */}
+      {phase === "preview" && preview && !payment?.success && (
+        <PreviewCard preview={preview} onPay={() => setShowPay(true)} />
+      )}
+
+      {showPay && (
+        <PaymentModal
+          amount="$2,400.00"
+          onPay={runPayment}
+          onClose={() => setShowPay(false)}
+        />
+      )}
+
+      {/* STEP 7 — Measure results (Lopus) */}
+      {payment?.success && (
+        <ResultsCard payment={payment} leads={leads} onReset={reset} />
+      )}
+    </div>
   );
 }
