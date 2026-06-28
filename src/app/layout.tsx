@@ -1,9 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Jost, Michroma, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Jost — a free geometric sans in the spirit of Futura (the 2001 title typeface).
+const jost = Jost({
+  variable: "--font-jost",
+  subsets: ["latin"],
+});
+
+// Michroma — squared "computer readout" face, used for eyebrow labels / wordmark.
+const michroma = Michroma({
+  variable: "--font-michroma",
+  weight: "400",
   subsets: ["latin"],
 });
 
@@ -26,7 +34,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${jost.variable} ${michroma.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
