@@ -130,9 +130,11 @@ export default function Home() {
   return (
     <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-3xl flex-col px-5 py-8">
       <header className="mb-10 flex items-center justify-between border-b border-line pb-5">
-        <button onClick={reset} className="flex items-center gap-2.5">
-          <span className="h-3 w-3 bg-orange" />
-          <span className="label text-ink">Ad Astra</span>
+        <button onClick={reset} className="flex items-center gap-3">
+          <span className="h-4 w-4 bg-orange" />
+          <span className="font-display text-base uppercase tracking-[0.14em] text-ink">
+            Ad Astra
+          </span>
         </button>
         <span className="label text-muted">Drone Geo-Targeting</span>
       </header>
@@ -146,12 +148,15 @@ export default function Home() {
       {/* STEP 0 — Landing */}
       {phase === "idle" && (
         <section className="relative flex flex-1 flex-col justify-center">
-          <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[150%] w-[150%] -translate-x-1/2 -translate-y-1/2 opacity-[0.08]">
+          <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 aspect-square w-[125%] max-w-[820px] -translate-x-1/2 -translate-y-1/2 opacity-[0.08]">
             <CorridorBackdrop className="h-full w-full" />
           </div>
 
           <p className="label mb-6 text-orange">Mission · 001</p>
-          <h1 className="display text-balance text-4xl leading-[1.05] sm:text-6xl">
+          <h1
+            className="display text-balance text-4xl leading-[1.05] sm:text-6xl"
+            style={{ fontWeight: 480 }}
+          >
             A new frontier in
             <br />
             <span className="text-orange">Geo targeting</span>
