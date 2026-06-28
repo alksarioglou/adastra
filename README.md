@@ -4,6 +4,8 @@
 
 > Hackathon track: **AI Ad Factories: AI Advertising**
 
+<img width="1512" height="949" alt="Screenshot 2026-06-28 at 14 38 14" src="https://github.com/user-attachments/assets/66659d20-be40-4246-8b65-82bffbb2c328" />
+
 Paste a product URL. Our AI reads your product, builds your Ideal Customer Profile, finds the real people who match it, and pinpoints the one place and moment where they physically cluster. Then a fleet of drones assembles into a scannable QR code in the sky above them — precision geo-targeting for the real world.
 
 ---
@@ -25,6 +27,10 @@ Ad Astra reaches people in the one place that has no ad inventory and no banner 
 ## Notable feature
 
 **Real-time 3D campaign simulation** — a photorealistic preview of the actual drone-QR takeover over the real city, built to convert the customer on the spot.
+
+<img width="1512" height="949" alt="Screenshot 2026-06-28 at 14 37 59" src="https://github.com/user-attachments/assets/f6a5b9e1-064e-4b3c-b414-0990122b8e59" />
+
+<img width="1511" height="950" alt="Screenshot 2026-06-28 at 14 38 37" src="https://github.com/user-attachments/assets/e22dc929-1785-46aa-9486-2bb7f7e0a9fb" />
 
 ## Why we built this
 
